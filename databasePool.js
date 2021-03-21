@@ -1,12 +1,24 @@
 const { Pool } = require('pg');
 
-const config = {
-    user: 'postgres',
-    password: process.env.PASSWORD,
-    host: process.env.DB_HOST,
-    database: 'dragon',
-    port: 5432
-};
+//DATABASE_URL
+let config = {};
+
+if (process.env.DATABASE_URL) {
+    client = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+            rejectUnauthorized: false
+        }
+    });
+} else {
+     config = {
+        user: 'postgres',
+        password: process.env.PASSWORD,
+        host: process.env.DB_HOST,
+        database: 'dragon',
+        port: 5432
+    };
+}
 
 console.log(config);
 
