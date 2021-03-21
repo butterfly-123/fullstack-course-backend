@@ -17,8 +17,8 @@ app.use(function(req, res, next) {
     console.log('#### HEADERS', req.headers);
 
     let domain = 'http://localhost:3002'
-    if (process.env.ENV !== 'dev') {
-        //domain = "https://dragon-fullstack-front.herokuapp.com"
+    if (process.env.NODE_ENV === 'production') {
+        domain = "https://dragon-fullstack-front.herokuapp.com"
     }
 
     res.header("Access-Control-Allow-Origin", domain);
