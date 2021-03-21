@@ -32,6 +32,7 @@ const setSession = ({ username, res, sessionId}) => {
 
  const setSessionCookie = ({ sessionString, res}) => {
      res.cookie('sessionString', sessionString, {
+         domain: '.herokuapp.com',
          expire: Date.now() + 3600000,
          httpOnly: true,
          secure: true // use with https
