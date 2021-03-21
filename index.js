@@ -24,7 +24,7 @@ app.locals.engine = engine;
 //     const domain = 'localhost:3001'
 // }
 
-const domain = 'https://dragon-fullstack-front.herokuapp.com/'
+const domain = 'dragon-fullstack-front.herokuapp.com'
 
 app.use(function(req, res, next) {
     res.header('Access-Control-Allow-Credentials', 'true')
