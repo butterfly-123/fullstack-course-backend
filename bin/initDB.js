@@ -9,7 +9,6 @@ const sql = `
     DROP TABLE IF EXISTS account CASCADE;
     DROP TABLE IF EXISTS accountDragon CASCADE;
 
-
     CREATE TABLE trait(
         id           SERIAL PRIMARY KEY,
         "traitType"  VARCHAR NOT NULL,
@@ -20,7 +19,6 @@ const sql = `
         id         SERIAL PRIMARY KEY,
         expiration TIMESTAMP NOT NULL
     );
-    
     
     CREATE TABLE dragon(
         id SERIAL                    PRIMARY KEY,
