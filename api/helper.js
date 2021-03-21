@@ -4,68 +4,50 @@ const { hash } = require('../account/helper');
 
 const setSession = ({ username, res, sessionId}) => {
     return new Promise((resolve, reject) => {
-        let session, sessionString;
+        const session = new Session({ username });
 
-        if (sessionId) {
-            sessionString =  Session.sessionString({ username, id: sessionId })
+        AccountTable.updateSessionId({
+            sessionId: session.id,
+            username
+        })
+            .then(() => {
+                // setSessionCookie({ sessionString, res});
 
-            setSessionCookie({ sessionString, res});
-
-            resolve({ message: 'session restored' });
-        } else {
-            session = new Session({ username });
-            sessionString = session.toString();
-
-            AccountTable.updateSessionId({
-                sessionId: session.id,
-                usernameHash: hash(username)
+                resolve({ message: 'session created ', sessionId: session.id});
             })
-                .then(() => {
-                    setSessionCookie({ sessionString, res});
-
-                    resolve({ message: 'session created '});
-                })
-                .catch(error => reject('err', error));
-        }
+            .catch(error => reject('err', error));
     })
  }
 
+// Because of heroku problems with setting cookies it will be stored in local storage
  const setSessionCookie = ({ sessionString, res}) => {
      res.cookie('sessionString', sessionString, {
-         domain: '.herokuapp.com',
          expire: Date.now() + 3600000,
-         httpOnly: true,
-         secure: true // use with https
+         httpOnly: true
+         // secure: true // use with https
      });
 }
 
-const authenticatedAccount = ({ sessionString }) => {
+const authenticatedAccount = ({ sessionId }) => {
     return new Promise((resolve, reject) => {
-        console.log('$$$ authenticatedAccount')
+        AccountTable.getAccountBySessionId(sessionId)
+            .then(({ account }) => {
+                console.log('authenticatedAccount', account);
 
+                if (typeof account === 'undefined') {
+                    console.log('ERROR - authenticatedAccount');
+                    const error = {};
+                    error.statusCode = 409;
 
-        if (!sessionString || !Session.verify(sessionString)) {
+                    return reject('err', error);
+                }
 
-            console.log('$$$ Invalid session')
-
-            const error = new Error('Invalid session');
-
-            error.statusCode = 400;
-
-            return reject(error);
-        } else {
-            const { username, id } = Session.parse(sessionString);
-
-            console.log(username, id)
-
-            AccountTable.getAccount({ usernameHash: hash(username) })
-                .then(({ account }) => {
-                    const authenticated = account.sessionId === id;
-
-                    resolve({ account, authenticated, username });
-                })
-                .catch(error => reject('err', error));
-        }
+                resolve({ account, authenticated: true, username: account.username });
+            })
+            .catch(error => {
+                console.log('ERROR - authenticatedAccount', error);
+                reject('err', error);
+            });
     })
 }
 

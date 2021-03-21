@@ -3,11 +3,11 @@ const { STARTING_BALANCE } = require('../config');
 const { hash } = require('../account/helper');
 
 class AccountTable {
-    static storeAccount({ usernameHash, passwordHash }) {
+    static storeAccount({ username, passwordHash }) {
         return new Promise((resolve, reject) => {
             pool.query(
-                'INSERT INTO account("usernameHash", "passwordHash", balance) VALUES($1, $2, $3)',
-                [usernameHash, passwordHash, STARTING_BALANCE],
+                'INSERT INTO account("username", "passwordHash", balance) VALUES($1, $2, $3)',
+                [username, passwordHash, STARTING_BALANCE],
                 (err, res) => {
                     console.log('##### STORE ACCOUNT ####', err)
 
@@ -19,11 +19,11 @@ class AccountTable {
         });
     }
 
-    static getAccount({ usernameHash }) {
+    static getAccount({ username }) {
         return new Promise((resolve, reject) => {
             pool.query(
-                'SELECT id, "passwordHash", "sessionId", balance FROM account WHERE "usernameHash" = $1',
-                [usernameHash],
+                'SELECT id, "passwordHash", "sessionId", balance FROM account WHERE "username" = $1',
+                [username],
                 (err, res) => {
                     if (err) return reject('err', err);
 
@@ -33,11 +33,26 @@ class AccountTable {
         });
     }
 
-    static updateSessionId({ sessionId, usernameHash }) {
+    static getAccountBySessionId(sessionId) {
         return new Promise((resolve, reject) => {
             pool.query(
-                'UPDATE account SET "sessionId" = $1 WHERE "usernameHash" = $2',
-                [sessionId, usernameHash],
+                'SELECT id, username, "passwordHash", "sessionId", balance FROM account WHERE "sessionId" = $1',
+                [sessionId],
+                (err, res) => {
+                    console.log('asdfasdf', err, res)
+                    if (err) return reject('err', err);
+
+                    resolve({ account: res.rows[0] });
+                }
+            );
+        });
+    }
+
+    static updateSessionId({ sessionId, username }) {
+        return new Promise((resolve, reject) => {
+            pool.query(
+                'UPDATE account SET "sessionId" = $1 WHERE "username" = $2',
+                [sessionId, username],
                 (err, res) => {
                     if (err) return reject('err', err);
 
@@ -61,15 +76,5 @@ class AccountTable {
         }))
     }
 }
-//
-// for (let i=0; i < 4; i++) {
-//     setTimeout(() => {
-//         const params = {usernameHash: hash('aneta'), passwordHash: hash('aneta')};
-//
-//         AccountTable.storeAccount(params)
-//             .then(({accountId}) => console.log('getDragonAccount: accountId', accountId))
-//             .catch(error => console.error('getDragonAccount: error', error))
-//     }, 0)
-// }
 
 module.exports = AccountTable;

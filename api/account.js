@@ -26,7 +26,6 @@ const isPassValid = (pass) => {
 
 router.post('/signup', (req, res, next) => {
     const { username, password } = req.body;
-    const usernameHash = hash(username);
     const passwordHash = hash(password);
 
     const errors = [];
@@ -45,10 +44,10 @@ router.post('/signup', (req, res, next) => {
     }
 
     setTimeout(() => {
-        AccountTable.getAccount({ usernameHash })
+        AccountTable.getAccount({ username })
             .then(({ account }) => {
                 if (!account) {
-                    return AccountTable.storeAccount({ usernameHash, passwordHash })
+                    return AccountTable.storeAccount({ username, passwordHash })
                 } else {
                     errors.push('ACCOUNT_USER_ALREADY_EXISTS');
                 }
@@ -61,8 +60,8 @@ router.post('/signup', (req, res, next) => {
             .then(() => {
                 return setSession({ username, res });
             })
-            .then(({ message }) => {
-                res.json({ message: 'success!' });
+            .then((message) => {
+                res.json(message);
             })
             .catch(next);
     }, 2000);
@@ -71,7 +70,7 @@ router.post('/signup', (req, res, next) => {
 router.post('/login', (req, res, next) => {
     const { username, password } = req.body;
 
-    AccountTable.getAccount({ usernameHash: hash(username) })
+    AccountTable.getAccount({ username })
         .then(({ account }) => {
             if (account && account.passwordHash === hash(password)) {
                 const { sessionId } = account;
@@ -86,33 +85,41 @@ router.post('/login', (req, res, next) => {
                 })
             }
         })
-        .then(({ message }) => res.json({ message }))
+        .then((data) => res.json(data))
         .catch(next);
 });
 
 router.get('/logout', (req, res, next) => {
-    const { username } = Session.parse(req.cookies.sessionString);
+    const sessionId = req.headers.authorization
 
-   AccountTable.updateSessionId({
-       sessionId: null,
-       usernameHash: hash(username)
-   })
-       .then(() => {
-           res.clearCookie('sessionString');
+    AccountTable
+        .getAccountBySessionId(sessionId)
+        .then(({account}) => {
+            AccountTable.updateSessionId({
+                sessionId: null,
+                username: account.username
+            })
+                .then(() => {
+                    res.clearCookie('sessionString');
 
-           res.json({ message: 'Successful logout' })
-       })
-       .catch(next);
+                    res.json({ message: 'Successful logout' })
+                })
+                .catch(next);
+        })
 });
 
 router.get('/authenticated', (req, res, next) => {
-    authenticatedAccount({ sessionString: req.cookies.sessionString })
+    authenticatedAccount({ sessionId: req.headers.authorization })
         .then(({ authenticated }) => res.json({ authenticated }))
-        .catch(error => next(error))
+        .catch(() => {
+            return res.status(409).json({
+                type: 'error',
+            })
+        })
 });
 
 router.get('/dragons', (req, res, next) => {
-    authenticatedAccount({ sessionString: req.cookies.sessionString })
+    authenticatedAccount({ sessionId: req.headers.authorization })
         .then(({ account }) => {
             console.log('### account ####', account)
 
@@ -136,7 +143,7 @@ router.get('/dragons', (req, res, next) => {
 });
 
 router.get('/info', (req, res, next) => {
-    authenticatedAccount({ sessionString: req.cookies.sessionString })
+    authenticatedAccount({ sessionId: req.headers.authorization })
         .then(({ account, username }) => {
             res.json({ info: { balance: account.balance, username }})
         })

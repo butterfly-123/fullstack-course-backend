@@ -11,23 +11,32 @@ const router = new Router();
 router.get('/new', (req, res, next) => {
     let accountId, dragon;
 
-    authenticatedAccount({ sessionString: req.cookies.sessionString })
+    console.log('req.headers.authorization', req.headers.authorization);
+
+    authenticatedAccount({ sessionId: req.headers.authorization })
         .then(({ account }) => {
             accountId = account.id;
 
+            console.log('ACCOUNT', account);
             dragon = req.app.locals.engine.generation.newDragon({ accountId });
+            console.log('DRAGON', dragon);
 
             return DragonTable.storeDragon(dragon);
         })
         .then(({ dragonId }) => {
             dragon.dragonId = dragonId;
-
             console.log('resolved dragonId', dragonId);
 
             return AccountDragonTable.storeAccountDragon({ accountId, dragonId });
         })
         .then(() => res.json({ dragon }))
-        .catch(error => next(error));
+        .catch(error => {
+            console.log(error)
+
+
+            next(error)
+
+        });
 });
 
 router.put('/update', (req, res, next) => {
