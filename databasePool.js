@@ -20,22 +20,8 @@ if (process.env.DATABASE_URL) {
     };
 }
 
-console.log(config);
+console.log('INIT DB', process.env, config);
 
 const pool = new Pool(config);
-
-// const query = `
-//         SELECT * FROM dragon
-//     `;
-//
-// pool.query(query, (err, res) => {
-//         if (err) return console.log('ERRROROOROROR', err);
-//
-//         console.log('ok', {
-//             foundRow: res.rowCount,
-//             rows: res.rows
-//         })
-//     }
-// );
 
 module.exports = pool;
