@@ -53,6 +53,25 @@ const sql = `
         "dragonId"      INTEGER REFERENCES dragon(id),
         PRIMARY KEY     ("accountId", "dragonId")
     );
+    
+    INSERT INTO trait (id, "traitType", "traitValue") 
+    VALUES
+    (1,'backgroundColor', 'black'),
+    (2,'backgroundColor','white'),
+    (3,'backgroundColor','orange'),
+    (4,'backgroundColor','pink'),
+    (5,'pattern','plain'),
+    (6,'pattern','striped'),
+    (7,'pattern','spotted'),
+    (8,'pattern','patchy'),
+    (9,'built','slender'),
+    (10,'built','stocky'),
+    (11,'built','sporty'),
+    (12,'built','skinny'),
+    (13,'size','small'),
+    (14,'size','big'),
+    (15,'size','medium'),
+    (16,'size','large');
 `
 
 pool.query(
@@ -64,8 +83,3 @@ pool.query(
     }
 )
 
-async function start() {
-    await insertTraits();
-}
-
-start();

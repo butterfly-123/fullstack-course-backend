@@ -7,7 +7,6 @@
     "start": "node ./bin/server",
     "dev": "nodemon ./bin/server.js",
     "initDB": "node ./bin/initDB.js",
-    "build": "node ./bin/initDB.js",
     "configure": "./bin/configure_db.sh"
   },
   "author": "",
