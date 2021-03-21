@@ -15,14 +15,20 @@ app.locals.engine = engine;
 //backend: localhost:3000
 //frontend: localhost:3001
 
-const cors = {
-    origin: ["localhost:3001","localhost:3002"],
-    default: "localhost:3001"
-}
+// const cors = {
+//     origin: ["localhost:3001","localhost:3002"],
+//     default: "localhost:3001"
+// }
+
+// if (process.env.ENV === 'dev') {
+//     const domain = 'localhost:3001'
+// }
+
+const domain = 'https://dragon-fullstack-front.herokuapp.com/'
 
 app.use(function(req, res, next) {
     res.header('Access-Control-Allow-Credentials', 'true')
-    res.setHeader('Access-Control-Allow-Origin', req.headers.origin)
+    res.setHeader('Access-Control-Allow-Origin', domain)
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
 
