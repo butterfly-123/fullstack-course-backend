@@ -33,8 +33,8 @@ const setSession = ({ username, res, sessionId}) => {
  const setSessionCookie = ({ sessionString, res}) => {
      res.cookie('sessionString', sessionString, {
          expire: Date.now() + 3600000,
-         httpOnly: true
-         // secure: true // use with https
+         httpOnly: true,
+         secure: true // use with https
      });
 }
 
